@@ -1,6 +1,6 @@
 ﻿namespace Shopping_cart.Models
 {
-	public class ProductRepository
+	public class ProductRepository : IProductRepository
 	{
 		private List<Product> DataSource()
 		{

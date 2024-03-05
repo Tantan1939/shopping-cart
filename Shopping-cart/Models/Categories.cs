@@ -16,4 +16,14 @@ namespace Shopping_cart.Models
 		[Description("Health & Personal Care")]
 		Health_and_personal_care
 	}
+
+	public static class ExtendBuiltInClasses
+	{
+		public static string GetDescription(this ProductCategories value)
+		{
+            var field = value.GetType().GetField(value.ToString()); // Reflection
+            var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)); // Get the custom attribute and cast it to description attribute
+            return attribute.Description;
+        }
+	}
 }
