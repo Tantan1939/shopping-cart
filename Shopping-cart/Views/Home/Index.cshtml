@@ -15,17 +15,49 @@
 				</div>
             </div>
         </div>
+    </div>
+</section>
 
+<section class="categories">
+    <div class="container">
         <div class="row">
-            <div class="major_categories">
-                <h4>Search By</h4>
-                <div class="blog__sidebar__item__tags">
-                    @foreach(var category in Model.CategoriesDescription)
-                    {
-                        <p>@category</p>
-                    }
-                </div>
+            <div class="category__choices">
+                @foreach (var category in Model.CategoriesDescription)
+                {
+                    <a href="#">@category</a>
+                }
             </div>
+        </div>
+    </div>
+</section>
+
+<section class="items">
+    <div class="container">
+        <div class="row">
+            @foreach(var product in Model.Products)
+            {
+                <div class="col-lg-3 col-md-3 col-sm-3">
+                    <div class="items__item">
+                        <div class="item__pic">
+                            <img src="@Url.Content(product.UrlImage)" alt="">
+                        </div>
+                        <div class="item__name">
+                            <ul>
+                                <li><i class="fa-solid fa-peso-sign"></i> @product.Price </li>
+                                <li> 3k+ sold </li>
+                            </ul>
+                            <h5>@(product.Name.Length > 20 ? product.Name.Substring(0, 20) + "..." : product.Name)</h5>
+                            <span>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </section>
