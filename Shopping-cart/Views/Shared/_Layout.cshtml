@@ -37,7 +37,7 @@
                 <div class="col-lg-6">
                     <nav class="header__menu">
                         <ul>
-                            <li><a href="#">Home</a></li>
+                            <li><a asp-controller="Home" asp-action="Index">Home</a></li>
                             <li><a href="#">Sell</a></li>
                             <li><a href="#">Support</a></li>
                             <li><a href="#">Order History</a></li>
@@ -66,19 +66,19 @@
                                     <li><a href="#">Item 4</a></li>
                                 </ul>
                             </li>
-                            <li>
+@*                            <li>
                                 <a href="#"><i class="fa-solid fa-user"></i> <span>Username</span> </a>
                                 <ul class="header__profile__dropdown">
-                                    <li><a href="#">Manage Account</a></li>
+                                    <li><a asp-controller="User" asp-action="Profile">Manage Account</a></li>
                                     <li><a href="#">Logout</a></li>
                                 </ul>
-                            </li>
-                            @*<li>
-                                <a class="access__btn" href="#">Login</a>
+                            </li>*@
+                            <li>
+                                <a class="access__btn" asp-controller="User" asp-action="Login">Login</a>
                             </li>
                             <li>
-                                <a class="access__btn" href="#">Sign Up</a>
-                            </li>*@
+                                <a class="access__btn" asp-controller="User" asp-action="Create">Sign Up</a>
+                            </li>
                         </ul>
                     </nav>
                 </div>

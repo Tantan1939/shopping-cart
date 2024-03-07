@@ -8,6 +8,11 @@
 	overflow: hidden;
 }
 
+.items__item a {
+	all: unset;
+	cursor: pointer;
+}
+
 .item__pic {
 	position: relative;
 	height: 80%;
