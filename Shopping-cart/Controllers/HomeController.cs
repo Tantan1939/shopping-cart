@@ -1,32 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Shopping_cart.Models;
+using Shopping_cart.ViewModels.Home;
 using System.Diagnostics;
 
 namespace Shopping_cart.Controllers
 {
+	[Route("")]
+	[Route("[controller]")]
 	public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;
 
-		public HomeController(ILogger<HomeController> logger)
+		private readonly IProductRepository? _productRepository;
+
+		public HomeController(ILogger<HomeController> logger, IProductRepository? productRepository)
 		{
 			_logger = logger;
+			_productRepository = productRepository;
 		}
 
+		[Route("")]
+		[Route("[action]")]
 		public IActionResult Index()
 		{
-			return View();
-		}
-
-		public IActionResult Privacy()
-		{
-			return View();
-		}
-
-		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-		public IActionResult Error()
-		{
-			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-		}
+			List<Product>? products = _productRepository?.GetAllItems();
+			HomeIndexViewModel hm = new HomeIndexViewModel()
+			{
+				Products = _productRepository?.GetAllItems()
+			};
+			return View(hm);
+        }
 	}
 }

@@ -1,0 +1,18 @@
+﻿.categories {
+	padding-bottom: 40px;
+}
+
+.category__choices {
+	padding: 25px 0 12px 0;
+	margin: auto;
+}
+
+.category__choices a {
+	font-size: 16px;
+	color: #6f6f6f;
+	background: #f5f5f5;
+	display: inline-block;
+	padding: 7px 26px 5px;
+	margin-right: 6px;
+	margin-bottom: 10px;
+}
