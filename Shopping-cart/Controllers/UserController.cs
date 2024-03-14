@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shopping_cart.Models;
 
 namespace Shopping_cart.Controllers
 {
@@ -6,22 +7,39 @@ namespace Shopping_cart.Controllers
     public class UserController : Controller
     {
 
-        [Route("[action]")]
-        [HttpGet]
+        [HttpGet("[action]")]
         public IActionResult Login()
         {
             return View();
         }
 
-        [Route("[action]")]
-        [HttpGet]
+        [HttpPost("[action]")]
+        public IActionResult Login([FromForm] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(user);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet("[action]")]
         public IActionResult Create()
         {
             return View();
         }
 
-        [Route("[action]")]
-        [HttpGet]
+        [HttpPost("[action]")]
+        public IActionResult Create([FromForm] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(user);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet("[action]")]
         public IActionResult Profile()
         {
             return View();
