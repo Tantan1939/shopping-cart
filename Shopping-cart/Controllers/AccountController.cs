@@ -5,6 +5,7 @@ using Shopping_cart.CustomFilters;
 using Microsoft.AspNetCore.Authorization;
 using Shopping_cart.ViewModels.Account;
 using Microsoft.AspNetCore.Identity;
+using Shopping_cart.Roles;
 
 namespace Shopping_cart.Controllers
 {
@@ -12,17 +13,17 @@ namespace Shopping_cart.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public AccountController(UserManager<ApplicationUser> usermanager, SignInManager<ApplicationUser> signinmanager, RoleManager<IdentityRole> rolemanager)
         {
-            userManager = usermanager;
-            signInManager = signinmanager;
-            roleManager = rolemanager;
+            _userManager = usermanager;
+            _signInManager = signinmanager;
+            _roleManager = rolemanager;
         }
 
         [HttpGet("[action]")]
@@ -43,17 +44,31 @@ namespace Shopping_cart.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpPost("[action]")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
         [HttpGet("[action]")]
 		[AllowAnonymous]
-		public IActionResult Register()
+		public IActionResult Register(string? ReturnUrl = null)
         {
+            TempData["ReturnUrl"] = ReturnUrl;
+            TempData.Keep("ReturnUrl");
+
             return View();
         }
 
         [HttpPost("[action]")]
 		[AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register([FromForm] AccountCreateViewModel model)
         {
+            // Note: Make this method atomic transaction
+
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser
@@ -62,19 +77,50 @@ namespace Shopping_cart.Controllers
                     Email = model.Email
                 };
 
-                var result = await userManager.CreateAsync(user, model.Password);
+                var createUser = await _userManager.CreateAsync(user, model.Password);
 
-                if (result.Succeeded)
+                if (createUser.Succeeded)
                 {
-                    await signInManager.SignInAsync(user, isPersistent: false);
+                    bool buyerRoleExists = await _roleManager.RoleExistsAsync(ApplicationRoles.Buyer);
+
+                    if (!buyerRoleExists)
+                    {
+                        IdentityRole buyerRole = new IdentityRole
+                        {
+                            Name = ApplicationRoles.Buyer
+                        };
+
+                        var createBuyerRole = await _roleManager.CreateAsync(buyerRole);
+
+                        if (!createBuyerRole.Succeeded)
+                        {
+                            foreach (var error in createBuyerRole.Errors)
+                            {
+                                ModelState.AddModelError(string.Empty, error.Description);
+                            }
+                            return View(model);
+                        }
+                    }
+
+                    await _userManager.AddToRoleAsync(user, ApplicationRoles.Buyer);
+
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    //if (TempData.ContainsKey("ReturnUrl"))
+                    //{
+                    //    string returnUrl = TempData["ReturnUrl"] as string;
+                    //    return Redirect(returnUrl);
+                    //}
+
                     return RedirectToAction("Index", "Home");
                 }
 
-                foreach (var error in result.Errors)
+                foreach (var error in createUser.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
             return View(model);
         }
 
