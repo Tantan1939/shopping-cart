@@ -8,7 +8,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Account\Error.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.28" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.28" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.28" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.28">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Account\Error.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Account\Error.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\Account\Error.cshtml" />
   </ItemGroup>
 
 </Project>

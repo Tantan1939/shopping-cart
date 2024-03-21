@@ -1,6 +1,9 @@
 using Shopping_cart.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Shopping_cart.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +17,18 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
 //Registering Model and Validator to show the error message on client side
-builder.Services.AddTransient<IValidator<User>, UserValidator>();
+builder.Services.AddTransient<IValidator<ApplicationUser>, ApplicationUserValidator>();
 
 // Dependencies to the container
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+builder.Services.AddDbContext<ApplicationDBcontext>(options =>
+{
+	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+	.AddEntityFrameworkStores<ApplicationDBcontext>();
 
 var app = builder.Build();
 
@@ -33,6 +44,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
