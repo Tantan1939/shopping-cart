@@ -10,7 +10,6 @@ using Shopping_cart.Roles;
 namespace Shopping_cart.Controllers
 {
     [Route("[controller]")]
-    [Authorize]
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -27,25 +26,46 @@ namespace Shopping_cart.Controllers
         }
 
         [HttpGet("[action]")]
-        [AllowAnonymous]
-        public IActionResult Login()
+        [NotLoggedInFilter]
+        public IActionResult Login([FromQuery] string? ReturnUrl = null)
         {
-			return View();
+            if (ReturnUrl != null)
+            {
+                TempData["ReturnUrl"] = ReturnUrl;
+                TempData.Keep("ReturnUrl");
+            }
+
+            return View();
 		}
 
         [HttpPost("[action]")]
-		[AllowAnonymous]
-		public IActionResult Login([FromForm] User user)
+        [NotLoggedInFilter]
+        [ValidateAntiForgeryToken]
+		public async Task<IActionResult> Login([FromForm] AccountLoginViewModel user)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View(user);
+                var loginResult = await _signInManager.PasswordSignInAsync(user.Email, user.Password, user.RememberMe, lockoutOnFailure: false);
+
+                if (!loginResult.Succeeded)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login credentials. Try again.");
+                    return View(user);
+                }
+
+                if (TempData.ContainsKey("ReturnUrl"))
+                {
+                    return Redirect(TempData["ReturnUrl"] as string);
+                }
+
+                return RedirectToAction("Index", "Home");
             }
-            return RedirectToAction("Index", "Home");
+            return View(user);
         }
 
         [HttpPost("[action]")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
@@ -53,18 +73,21 @@ namespace Shopping_cart.Controllers
         }
 
         [HttpGet("[action]")]
-		[AllowAnonymous]
-		public IActionResult Register(string? ReturnUrl = null)
+        [NotLoggedInFilter]
+		public IActionResult Register([FromQuery] string? ReturnUrl = null)
         {
-            TempData["ReturnUrl"] = ReturnUrl;
-            TempData.Keep("ReturnUrl");
+            if (ReturnUrl != null)
+            {
+                TempData["ReturnUrl"] = ReturnUrl;
+                TempData.Keep("ReturnUrl");
+            }
 
             return View();
         }
 
         [HttpPost("[action]")]
-		[AllowAnonymous]
         [ValidateAntiForgeryToken]
+        [NotLoggedInFilter]
         public async Task<IActionResult> Register([FromForm] AccountCreateViewModel model)
         {
             // Note: Make this method atomic transaction
@@ -106,11 +129,11 @@ namespace Shopping_cart.Controllers
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
-                    //if (TempData.ContainsKey("ReturnUrl"))
-                    //{
-                    //    string returnUrl = TempData["ReturnUrl"] as string;
-                    //    return Redirect(returnUrl);
-                    //}
+                    if (TempData.ContainsKey("ReturnUrl"))
+                    {
+                        string returnUrl = TempData["ReturnUrl"] as string;
+                        return Redirect(returnUrl);
+                    }
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -125,13 +148,13 @@ namespace Shopping_cart.Controllers
         }
 
         [HttpGet("[action]")]
+        [Authorize]
         public IActionResult Profile()
         {
             return View();
         }
 
         [HttpGet("[action]")]
-        [AllowAnonymous]
         public ActionResult Error()
         {
             return View();
