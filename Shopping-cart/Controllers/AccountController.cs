@@ -29,7 +29,7 @@ namespace Shopping_cart.Controllers
         [NotLoggedInFilter]
         public IActionResult Login([FromQuery] string? ReturnUrl = null)
         {
-            if (ReturnUrl != null)
+            if (ReturnUrl != null && Url.IsLocalUrl(ReturnUrl))
             {
                 TempData["ReturnUrl"] = ReturnUrl;
                 TempData.Keep("ReturnUrl");
@@ -53,7 +53,7 @@ namespace Shopping_cart.Controllers
                     return View(user);
                 }
 
-                if (TempData.ContainsKey("ReturnUrl"))
+                if (TempData.ContainsKey("ReturnUrl") && Url.IsLocalUrl(TempData["ReturnUrl"] as string))
                 {
                     return Redirect(TempData["ReturnUrl"] as string);
                 }
@@ -76,7 +76,7 @@ namespace Shopping_cart.Controllers
         [NotLoggedInFilter]
 		public IActionResult Register([FromQuery] string? ReturnUrl = null)
         {
-            if (ReturnUrl != null)
+            if (ReturnUrl != null && Url.IsLocalUrl(ReturnUrl))
             {
                 TempData["ReturnUrl"] = ReturnUrl;
                 TempData.Keep("ReturnUrl");
@@ -129,7 +129,7 @@ namespace Shopping_cart.Controllers
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
-                    if (TempData.ContainsKey("ReturnUrl"))
+                    if (TempData.ContainsKey("ReturnUrl") && Url.IsLocalUrl(TempData["ReturnUrl"] as string))
                     {
                         string returnUrl = TempData["ReturnUrl"] as string;
                         return Redirect(returnUrl);

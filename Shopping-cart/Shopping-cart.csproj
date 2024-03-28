@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Shopping_cart</RootNamespace>
+    <UserSecretsId>54f7e8b8-3b63-4b6a-b141-3799d9744c3f</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

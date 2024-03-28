@@ -4,6 +4,7 @@ using FluentValidation.AspNetCore;
 using Shopping_cart.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Shopping_cart.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,11 +25,13 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddDbContext<ApplicationDBcontext>(options =>
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+	options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 	.AddEntityFrameworkStores<ApplicationDBcontext>();
+
+builder.Services.AddTransient<ISenderEmail, EmailService>();
 
 var app = builder.Build();
 
