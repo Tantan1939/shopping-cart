@@ -5,6 +5,7 @@ using Shopping_cart.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Shopping_cart.Services;
+using Shopping_cart.CustomFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,10 +29,18 @@ builder.Services.AddDbContext<ApplicationDBcontext>(options =>
 	options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-	.AddEntityFrameworkStores<ApplicationDBcontext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
+		options =>
+		{
+			options.SignIn.RequireConfirmedEmail = true;
+		}
+	)
+	.AddEntityFrameworkStores<ApplicationDBcontext>()
+	.AddDefaultTokenProviders();
 
 builder.Services.AddTransient<ISenderEmail, EmailService>();
+builder.Services.AddScoped<ConfirmEmailFilter>();
+builder.Services.AddScoped<PasswordResetTokenFilter>();
 
 var app = builder.Build();
 

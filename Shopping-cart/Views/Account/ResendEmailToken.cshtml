@@ -1,0 +1,29 @@
+﻿@model ApplicationUser
+@{
+    ViewBag.Title = "Resend Confirmation Link";
+}
+
+<div class="row">
+    <div class="col-md-6">
+
+        <h1>Resend Email Confirmation Link</h1>
+
+        <form method="post" asp-controller="Account" asp-action="ResendEmailToken">
+
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label for="email">Send email confirmation to: </label>
+                <input type="text" name="email" class="form-control" value="@Model.Email" readonly />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <button class="btn btn-primary" type="submit">Resend</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
