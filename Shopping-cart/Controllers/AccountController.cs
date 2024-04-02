@@ -76,6 +76,20 @@ namespace Shopping_cart.Controllers
             }
         }
 
+        private async Task SendAccountLockedOutEmail(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null)
+            {
+                await _emailSender.SendEmailAsync(
+                        user.Email,
+                        "Account Locked Out",
+                        $"Your account is temporarily locked out after {_userManager.Options.Lockout.MaxFailedAccessAttempts} failed attempts."
+                    );
+            }
+        }
+
         [HttpGet("[action]")]
         [NotLoggedInFilter]
         [ServiceFilter(typeof(ConfirmEmailFilter))]
@@ -101,7 +115,7 @@ namespace Shopping_cart.Controllers
 
         [HttpGet("[action]")]
         [NotLoggedInFilter]
-        public IActionResult Login([FromQuery] string? ReturnUrl)
+        public IActionResult Login([FromQuery] string? ReturnUrl = null)
         {
             if (ReturnUrl != null && Url.IsLocalUrl(ReturnUrl))
             {
@@ -122,7 +136,7 @@ namespace Shopping_cart.Controllers
                 return View(user);
             }
 
-            var loginResult = await _signInManager.PasswordSignInAsync(user.Email, user.Password, user.RememberMe, lockoutOnFailure: false);
+            var loginResult = await _signInManager.PasswordSignInAsync(user.Email, user.Password, user.RememberMe, lockoutOnFailure: true);
 
             if (loginResult.Succeeded)
             {
@@ -133,9 +147,21 @@ namespace Shopping_cart.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            if (await _userManager.FindByEmailAsync(user.Email) != null && 
-                await _userManager.CheckPasswordAsync(await _userManager.FindByEmailAsync(user.Email), user.Password) &&
-                await _userManager.IsEmailConfirmedAsync(await _userManager.FindByEmailAsync(user.Email)) == false)
+            if (loginResult.IsLockedOut)
+            {
+                await SendAccountLockedOutEmail(user.Email);
+                return View("AccountLockout");
+            }
+
+            if (loginResult.RequiresTwoFactor)
+            {
+                // Do nothing
+            }
+
+            if (await _userManager.FindByEmailAsync(user.Email) is var user2 &&
+                user2 != null &&
+                await _userManager.CheckPasswordAsync(user2, user.Password) &&
+                !await _userManager.IsEmailConfirmedAsync(user2))
             {
                 ViewBag.message = "Your email is still not verified/confirm. Please check your email for confirmation link to continue.";
                 return View(
@@ -143,7 +169,19 @@ namespace Shopping_cart.Controllers
                     await _userManager.FindByEmailAsync(user.Email));
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login credentials. Try again.");
+            if (await _userManager.FindByEmailAsync(user.Email) is var user3 &&
+                user3 != null &&
+                !await _userManager.CheckPasswordAsync(user3, user.Password) &&
+                await _userManager.IsEmailConfirmedAsync(user3))
+            {
+                var attempsLeft = _userManager.Options.Lockout.MaxFailedAccessAttempts - await _userManager.GetAccessFailedCountAsync(user3);
+
+                ModelState.AddModelError(string.Empty, $"Invalid login credentials. {attempsLeft} remaining attempt/s.");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login credentials. Try again.");
+            }
             return View(user);
         }
 
@@ -158,7 +196,7 @@ namespace Shopping_cart.Controllers
 
         [HttpGet("[action]")]
         [NotLoggedInFilter]
-		public IActionResult Register([FromQuery] string? ReturnUrl)
+		public IActionResult Register([FromQuery] string? ReturnUrl = null)
         {
             if (ReturnUrl != null && Url.IsLocalUrl(ReturnUrl))
             {
