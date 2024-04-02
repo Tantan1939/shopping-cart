@@ -31,6 +31,11 @@ namespace Shopping_cart.CustomFilters
                 context.Result = new ForbidResult();
             }
 
+            //if (await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<ApplicationUser>.ConfirmEmailTokenPurpose, Token) == false)
+            //{
+            //    context.Result = new ForbidResult();
+            //}
+
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Shopping_cart.Controllers
                 await _emailSender.SendEmailAsync(
                     user.Email,
                     "Confirm Your Email",
-                    $"Please confirm your account by clicking <a href='{confirmationLink}'>here</a>.");
+                    $"Confirm your account using this link {confirmationLink}.");
             }
             catch (Exception ex)
             {
@@ -87,8 +87,6 @@ namespace Shopping_cart.Controllers
 
             if (result.Succeeded)
             {
-                ViewBag.message = "Email confirmed successfully.";
-                
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
                 return RedirectToAction("Index", "Home");
@@ -103,7 +101,7 @@ namespace Shopping_cart.Controllers
 
         [HttpGet("[action]")]
         [NotLoggedInFilter]
-        public IActionResult Login([FromQuery] string? ReturnUrl = null)
+        public IActionResult Login([FromQuery] string? ReturnUrl)
         {
             if (ReturnUrl != null && Url.IsLocalUrl(ReturnUrl))
             {
@@ -160,7 +158,7 @@ namespace Shopping_cart.Controllers
 
         [HttpGet("[action]")]
         [NotLoggedInFilter]
-		public IActionResult Register([FromQuery] string? ReturnUrl = null)
+		public IActionResult Register([FromQuery] string? ReturnUrl)
         {
             if (ReturnUrl != null && Url.IsLocalUrl(ReturnUrl))
             {
@@ -215,9 +213,7 @@ namespace Shopping_cart.Controllers
 
                     await SendConfirmationEmail(user);
 
-                    ViewBag.message = "A confirmation link is sent to your email. Click it to confirm your account.";
-
-                    return RedirectToAction("Index", "Home");
+                    return View("UserRegistrationSuccessPage");
                 }
 
                 foreach (var error in createUser.Errors)
@@ -238,14 +234,12 @@ namespace Shopping_cart.Controllers
 
             if (user != null && await _userManager.IsEmailConfirmedAsync(user))
             {
-                ViewBag.message = "Email is already confirmed. You can now log in.";
                 return RedirectToAction("Login", "Account");
             }
 
             if (user != null)
             {
                 await SendConfirmationEmail(user);
-                ViewBag.message = "Confirmation email is sent again to your email.";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -278,7 +272,7 @@ namespace Shopping_cart.Controllers
                 await SendPasswordResetToken(user);
 
                 ViewBag.message = "Please check your email for reset link";
-                return RedirectToAction("Login");
+                return View("Login");
             }
 
             if (ModelState.IsValid)
@@ -299,7 +293,7 @@ namespace Shopping_cart.Controllers
             await SendPasswordResetToken(user);
 
             ViewBag.message = "Please check your email for reset link.";
-            return RedirectToAction("Profile");
+            return View("Profile");
         }
 
         [HttpGet("[action]")]
@@ -323,7 +317,7 @@ namespace Shopping_cart.Controllers
 
                 if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "User no longer exist.");
+                    //ModelState.AddModelError(string.Empty, "User no longer exist.");
                     return RedirectToAction("Index", "Home");
                 }
 
