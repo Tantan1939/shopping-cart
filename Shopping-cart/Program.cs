@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Shopping_cart.Services;
 using Shopping_cart.CustomFilters;
+using Shopping_cart.ViewModels.Account;
+using Shopping_cart.FluentAPIValidators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,7 @@ builder.Services.AddFluentValidationClientsideAdapters();
 
 //Registering Model and Validator to show the error message on client side
 builder.Services.AddTransient<IValidator<ApplicationUser>, ApplicationUserValidator>();
+builder.Services.AddTransient<IValidator<AccountChangePasswordViewModel>, ChangePasswordValidator>();
 
 // Dependencies to the container
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

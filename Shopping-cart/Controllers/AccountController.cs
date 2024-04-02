@@ -346,6 +346,41 @@ namespace Shopping_cart.Controllers
 
         [HttpGet("[action]")]
         [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost("[action]")]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword([FromForm] AccountChangePasswordViewModel userpasswords)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                var result = await _userManager.ChangePasswordAsync(user, userpasswords.OldPassword, userpasswords.Password);
+
+                if (result.Succeeded)
+                {
+                    await _signInManager.RefreshSignInAsync(user);
+
+                    ViewBag.message = "Password changed successfully.";
+
+                    return View("Profile");
+                }
+
+                foreach(var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return View(userpasswords);
+        }
+
+        [HttpGet("[action]")]
+        [Authorize]
         public IActionResult Profile()
         {
             return View();
