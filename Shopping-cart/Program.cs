@@ -37,6 +37,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
 		{
 			options.SignIn.RequireConfirmedEmail = true;
 
+			options.User.RequireUniqueEmail = true;
+
 			// Lockout settings
 			options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 			options.Lockout.MaxFailedAccessAttempts = 5;
