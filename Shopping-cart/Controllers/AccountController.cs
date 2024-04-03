@@ -9,6 +9,7 @@ using Shopping_cart.Roles;
 using Shopping_cart.Services;
 using System.Text.Encodings.Web;
 using System.Security.Claims;
+using Shopping_cart.Extensions;
 
 namespace Shopping_cart.Controllers
 {
@@ -76,7 +77,7 @@ namespace Shopping_cart.Controllers
             }
         }
 
-        private async Task SendAccountLockedOutEmail(string email)
+        internal async Task SendAccountLockedOutEmail(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
@@ -129,14 +130,22 @@ namespace Shopping_cart.Controllers
         [HttpPost("[action]")]
         [NotLoggedInFilter]
         [ValidateAntiForgeryToken]
-		public async Task<IActionResult> Login([FromForm] AccountLoginViewModel user)
+		public async Task<IActionResult> Login([FromForm] AccountLoginViewModel userLogin)
         {
             if (!ModelState.IsValid)
             {
-                return View(user);
+                return View(userLogin);
             }
 
-            var loginResult = await _signInManager.PasswordSignInAsync(user.Email, user.Password, user.RememberMe, lockoutOnFailure: true);
+            if (await _userManager.FindByEmailAsync(userLogin.Email) is var user &&
+                user != null &&
+                !await _userManager.CheckPasswordAsync(user, userLogin.Password) &&
+                await _userManager.GetAccessFailedCountAsync(user) == 4)
+            {
+                await SendAccountLockedOutEmail(user.Email);
+            }
+
+            var loginResult = await _signInManager.PasswordSignInAsync(userLogin.Email, userLogin.Password, userLogin.RememberMe, lockoutOnFailure: true);
 
             if (loginResult.Succeeded)
             {
@@ -149,7 +158,6 @@ namespace Shopping_cart.Controllers
 
             if (loginResult.IsLockedOut)
             {
-                await SendAccountLockedOutEmail(user.Email);
                 return View("AccountLockout");
             }
 
@@ -158,20 +166,20 @@ namespace Shopping_cart.Controllers
                 // Do nothing
             }
 
-            if (await _userManager.FindByEmailAsync(user.Email) is var user2 &&
+            if (await _userManager.FindByEmailAsync(userLogin.Email) is var user2 &&
                 user2 != null &&
-                await _userManager.CheckPasswordAsync(user2, user.Password) &&
+                await _userManager.CheckPasswordAsync(user2, userLogin.Password) &&
                 !await _userManager.IsEmailConfirmedAsync(user2))
             {
                 ViewBag.message = "Your email is still not verified/confirm. Please check your email for confirmation link to continue.";
                 return View(
                     "ResendEmailToken",
-                    await _userManager.FindByEmailAsync(user.Email));
+                    await _userManager.FindByEmailAsync(userLogin.Email));
             }
 
-            if (await _userManager.FindByEmailAsync(user.Email) is var user3 &&
+            if (await _userManager.FindByEmailAsync(userLogin.Email) is var user3 &&
                 user3 != null &&
-                !await _userManager.CheckPasswordAsync(user3, user.Password) &&
+                !await _userManager.CheckPasswordAsync(user3, userLogin.Password) &&
                 await _userManager.IsEmailConfirmedAsync(user3))
             {
                 var attempsLeft = _userManager.Options.Lockout.MaxFailedAccessAttempts - await _userManager.GetAccessFailedCountAsync(user3);
@@ -182,7 +190,7 @@ namespace Shopping_cart.Controllers
             {
                 ModelState.AddModelError(string.Empty, "Invalid login credentials. Try again.");
             }
-            return View(user);
+            return View(userLogin);
         }
 
         [HttpPost("[action]")]
