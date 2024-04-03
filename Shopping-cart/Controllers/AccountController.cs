@@ -140,7 +140,7 @@ namespace Shopping_cart.Controllers
             if (await _userManager.FindByEmailAsync(userLogin.Email) is var user &&
                 user != null &&
                 !await _userManager.CheckPasswordAsync(user, userLogin.Password) &&
-                await _userManager.GetAccessFailedCountAsync(user) == 4)
+                await _userManager.GetAccessFailedCountAsync(user) == _userManager.Options.Lockout.MaxFailedAccessAttempts - 1)
             {
                 await SendAccountLockedOutEmail(user.Email);
             }
