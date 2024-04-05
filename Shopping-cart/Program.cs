@@ -23,6 +23,7 @@ builder.Services.AddFluentValidationClientsideAdapters();
 //Registering Model and Validator to show the error message on client side
 builder.Services.AddTransient<IValidator<ApplicationUser>, ApplicationUserValidator>();
 builder.Services.AddTransient<IValidator<AccountChangePasswordViewModel>, ChangePasswordValidator>();
+builder.Services.AddTransient<IValidator<AccountProfileViewModel>, AccountProfileValidator>();
 
 // Dependencies to the container
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

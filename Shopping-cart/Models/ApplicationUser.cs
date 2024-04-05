@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace Shopping_cart.Models
 {
@@ -16,5 +17,29 @@ namespace Shopping_cart.Models
 
         public readonly DateTime DateCreated = DateTime.Now;
 		public DateTime? LastLogin { get; set; }
+
+		public string GetName()
+		{
+			var name = "";
+
+			if (FirstName != null)
+			{
+				name += FirstName;
+			}
+
+			if (LastName != null)
+			{
+				name += LastName;
+			}
+
+			if (name != "")
+			{
+				return name;
+			}
+			else
+			{
+				return Email;
+			}
+		}
 	}
 }

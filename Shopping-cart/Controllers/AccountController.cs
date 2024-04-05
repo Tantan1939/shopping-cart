@@ -427,9 +427,53 @@ namespace Shopping_cart.Controllers
 
         [HttpGet("[action]")]
         [Authorize]
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
-            return View();
+            var user = await _userManager.GetUserAsync(User);
+
+            var profileUser = new AccountProfileViewModel()
+            {
+                FirstName = user.FirstName,
+                MiddleName = user.MiddleName,
+                LastName = user.LastName,
+                Birthdate = user.Birthdate,
+                PhoneNumber = user.PhoneNumber
+            };
+
+            return View(profileUser);
+        }
+
+        [HttpPost("[action]")]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile([FromForm] AccountProfileViewModel userProfile)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.GetUserAsync(User);
+
+                user.FirstName = userProfile.FirstName;
+                user.MiddleName = userProfile.MiddleName;
+                user.LastName = userProfile.LastName;
+                user.PhoneNumber = userProfile.PhoneNumber;
+                user.Birthdate = userProfile.Birthdate;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    await _signInManager.RefreshSignInAsync(user);
+                    ViewBag.message = "Profile updated.";
+                    return View(userProfile);
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return View(userProfile);
         }
 
         [HttpGet("[action]")]
