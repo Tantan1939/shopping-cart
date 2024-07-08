@@ -2,10 +2,10 @@
 {
     public class ApplicationRoles
     {
-        public static string Buyer = "Buyer";
+        public const string Buyer = "Buyer";
 
-        public static string Seller = "Seller";
+        public const string Seller = "Seller";
 
-        public static string Support = "Support";
+        public const string Support = "Support";
     }
 }

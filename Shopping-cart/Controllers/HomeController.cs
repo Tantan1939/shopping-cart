@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shopping_cart.Data;
 using Shopping_cart.Models;
 using Shopping_cart.ViewModels.Home;
 using System.Diagnostics;
@@ -13,10 +14,13 @@ namespace Shopping_cart.Controllers
 
 		private readonly IProductRepository? _productRepository;
 
-		public HomeController(ILogger<HomeController> logger, IProductRepository? productRepository)
+		private readonly ApplicationDBcontext _dbcontext;
+
+		public HomeController(ILogger<HomeController> logger, IProductRepository? productRepository, ApplicationDBcontext context)
 		{
 			_logger = logger;
 			_productRepository = productRepository;
+			_dbcontext = context;
 		}
 
 		[Route("")]

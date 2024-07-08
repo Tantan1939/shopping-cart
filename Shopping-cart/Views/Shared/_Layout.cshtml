@@ -41,7 +41,18 @@
                     <nav class="header__menu">
                         <ul>
                             <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-                            <li><a href="#">Sell</a></li>
+                            @if (
+                                SignInManager.IsSignedIn(User) &&
+                                await UserManager.GetUserAsync(User) is var user &&
+                                await UserManager.IsInRoleAsync(user, ApplicationRoles.Seller)
+                            )
+                            {
+                                <li><a asp-controller="Seller" asp-action="Dashboard">Sell</a></li>
+                            }
+                            else
+                            {
+                                <li><a asp-controller="Seller" asp-action="Application">Sell</a></li>
+                            }
                             <li><a href="#">Support</a></li>
                             <li><a href="#">Order History</a></li>
                         </ul>
@@ -73,7 +84,6 @@
                             @if (SignInManager.IsSignedIn(User))
                             {
                                 var username = await UserManager.GetUserAsync(User);
-
                                 <li>
                                     <a href="#"><i class="fa-solid fa-user"></i> <span>
                                             @(username.GetName().Length > 6 ? username.GetName().Substring(0, 6) + "..." : username.GetName())
